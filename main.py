@@ -6,7 +6,7 @@ import uvicorn
 import os
 
 # Import models to register them with SQLAlchemy
-from app.models import chat_session, chat_message
+from app.models import chat_session
 
 # Create database tables
 from app.models.base import Base
