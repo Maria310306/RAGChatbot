@@ -30,15 +30,18 @@ class VectorStoreManager:
         """Check if the collection exists, create if it doesn't"""
         try:
             self.client.get_collection(self.collection_name)
-        except Exception:
-            # Collection doesn't exist, create it
-            self.client.create_collection(
-                collection_name=self.collection_name,
-                vectors_config=models.VectorParams(
-                    size=1536,  # Standard size for OpenAI embeddings
-                    distance=models.Distance.COSINE
-                ),
-            )
+        except Exception as e:
+            # Only create the collection if it doesn't exist
+            # Handle specific "collection exists" error
+            if "already exists" not in str(e).lower() and "exists" not in str(e).lower():
+                # Collection doesn't exist, create it
+                self.client.create_collection(
+                    collection_name=self.collection_name,
+                    vectors_config=models.VectorParams(
+                        size=1536,  # Standard size for OpenAI embeddings
+                        distance=models.Distance.COSINE
+                    ),
+                )
 
     def add_texts(
         self,
