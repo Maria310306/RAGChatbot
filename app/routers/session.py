@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from typing import List
 
 from app.database.session import get_db
-from app.schemas.chat import ChatSession, ChatSessionCreate, ChatSessionUpdate, ChatSessionWithMessages
+from app.schemas.chat import ChatSession, ChatSessionCreate, ChatSessionUpdate, ChatSessionWithMessages, ChatMessage
 from app.models.chat_session import ChatSession as ChatSessionModel, ChatMessage as ChatMessageModel
 
 router = APIRouter()
