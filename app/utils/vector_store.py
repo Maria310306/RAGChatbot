@@ -31,17 +31,26 @@ class VectorStoreManager:
         try:
             self.client.get_collection(self.collection_name)
         except Exception as e:
+            error_msg = str(e).lower()
             # Only create the collection if it doesn't exist
-            # Handle specific "collection exists" error
-            if "already exists" not in str(e).lower() and "exists" not in str(e).lower():
-                # Collection doesn't exist, create it
-                self.client.create_collection(
-                    collection_name=self.collection_name,
-                    vectors_config=models.VectorParams(
-                        size=1536,  # Standard size for OpenAI embeddings
-                        distance=models.Distance.COSINE
-                    ),
-                )
+            # Handle specific "collection exists" error or validation errors
+            if "already exists" not in error_msg and "exists" not in error_msg:
+                # If it's a validation error about an existing collection,
+                # it means the collection already exists, so we don't need to create it
+                if "validationerror" not in error_msg:
+                    try:
+                        # Collection doesn't exist, create it
+                        self.client.create_collection(
+                            collection_name=self.collection_name,
+                            vectors_config=models.VectorParams(
+                                size=1536,  # Standard size for OpenAI embeddings
+                                distance=models.Distance.COSINE
+                            ),
+                        )
+                    except Exception as creation_error:
+                        # If creation fails because it already exists, that's fine
+                        if "already exists" not in str(creation_error).lower():
+                            raise creation_error
 
     def add_texts(
         self,
