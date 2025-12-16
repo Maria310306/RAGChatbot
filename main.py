@@ -1,21 +1,32 @@
 from fastapi import FastAPI
 from app.routers import chat, session
 from app.core.config import settings
-from app.database.session import engine
 import uvicorn
 import os
+from contextlib import asynccontextmanager
+from sqlalchemy.ext.asyncio import create_async_engine
 
 # Import models to register them with SQLAlchemy
 from app.models import chat_session
 
-# Create database tables
+# Import base for table creation
 from app.models.base import Base
-Base.metadata.create_all(bind=engine)
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Create database tables on startup
+    engine = create_async_engine(settings.database_url)
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+    yield
+    # Shutdown
+    await engine.dispose()
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
     version=settings.VERSION,
-    description="Embedded RAG Chatbot for Published Book"
+    description="Embedded RAG Chatbot for Published Book",
+    lifespan=lifespan
 )
 
 # Include API routers
